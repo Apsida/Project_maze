@@ -7,6 +7,7 @@ class Maze:
         self.v_arr = []
         self.line = []
         self.set_arr = []
+        self.set_num = 0 #счётчик генерации уникальных множеств
 
     def generate(self):
         self.creat_line()
@@ -24,11 +25,10 @@ class Maze:
             self.line.append(None)
 
     def assign_set(self):
-        count = 1   #счётчик генерации уникальных множеств
         for i in range(self.size):
             if self.line[i] == None:
-                self.line[i] = count
-                count += 1
+                self.line[i] = self.set_num
+                self.set_num += 1
 
     def add_ver_wall(self):
         vert_wall = [0]*self.size
@@ -68,24 +68,34 @@ class Maze:
                 self.h_arr[row][i] = 0
 
     def prepare_new_line(self, row):
-        self.set_arr.append(self.line)      #сохраняем строку множеств
+        self.set_arr.append(self.line.copy())      #сохраняем строку множеств
         for i in range(self.size):
             if self.h_arr[row][i] == 1:     #все ячейки под стенками удаляем из множеств
                 self.line[i] = None
 
     def end_gen(self):
         self.h_arr[self.size-1] = [1]*self.size
-        for i in range(self.size-1):
-            if self.line[i] != self.line[i+1]:
-                self.v_arr[self.size-1][i] = 0
-                self.line[i] = self.line[i + 1]
+        self.v_arr[self.size-1] = [0]*(self.size-1)
+        self.v_arr[self.size-1].append(1)
 
 if __name__ == "__main__":
     s = 5
     m = Maze(s)
     m.generate()
     for i in range(s):
-        print(m.v_arr[i])
+        print(m.set_arr[i])
     print()
     for i in range(s):
-        print(m.h_arr[i])
+        for j in range(s):
+            print(0,end="")
+            if m.v_arr[i][j] == 1:
+                print("|", end="")
+            else:
+                print(" ", end="")
+        print()
+        for j in range(s):
+            if m.h_arr[i][j] == 1:
+                print("— ", end = "")
+            else:
+                print("  ", end="")
+        print()
