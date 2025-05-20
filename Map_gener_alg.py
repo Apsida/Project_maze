@@ -3,14 +3,20 @@ from random import choice
 class Maze:
     def __init__(self, size):
         self.size = size
+        self.maze = []
         self.h_arr = []
         self.v_arr = []
         self.line = []
         self.set_arr = []
         self.set_num = 0 #счётчик генерации уникальных множеств
 
+    def _fill_maze(self):
+        for i in range(self.size):
+            self.maze.append([0]*self.size)
+
     def generate(self):
         self.creat_line()
+        self._fill_maze()
         for j in range(self.size):
             self.assign_set()
             self.add_ver_wall()
@@ -34,10 +40,12 @@ class Maze:
         vert_wall = [0]*self.size
         for i in range(self.size):
             choose = choice([True, False])  #выбираем ставить стенку или нет
-            if choose == True or i == self.size-1 or self.line[i] == self.line[i+1]:    #если ячейка - правая граница или текущая ячейка и ячейка справа принадлежат одному множеству (для предотвращения зацикливаний)
+            #если ячейка - правая граница или текущая ячейка и ячейка справа принадлежат одному множеству (для предотвращения зацикливаний)
+            if choose == True or i == self.size-1 or self.line[i] == self.line[i+1]:
                 vert_wall[i] = 1
             else:
-                self.line[i+1] = self.line[i]   #объединяем эелементы разным множеств в случае если не ставим стенку
+                # объединяем эелементы разным множеств в случае если не ставим стенку
+                self.line[i+1] = self.line[i]
         self.v_arr.append(vert_wall)
 
     def _calc_size_set(self, set_name):
@@ -51,7 +59,8 @@ class Maze:
         hor_wall = [0] * self.size
         for i in range(self.size):
             choose = choice([True, False])
-            if choose == True and self._calc_size_set(self.line[i]) == True:    #Ставим стенку если у данного множества более 1 элемента
+            # Ставим стенку если у данного множества более 1 элемента
+            if choose == True and self._calc_size_set(self.line[i]) == True:
                 hor_wall[i] = 1
         self.h_arr.append(hor_wall)
 
@@ -75,27 +84,20 @@ class Maze:
 
     def end_gen(self):
         self.h_arr[self.size-1] = [1]*self.size
-        self.v_arr[self.size-1] = [0]*(self.size-1)
+        self.add_ver_wall()
         self.v_arr[self.size-1].append(1)
 
+    def _bypass(self, count, name):
+        for i in range(self.size):
+            for j in range(self.size):
+                if count > 0 and self.maze[i][j] == 0 and choice([True, False]):
+                    self.maze[i][j] = name
+                    count -= 1
+
+    def add_object (self, arr_obj):
+        for i in arr_obj:
+            self._bypass(i.count, i.name[0])
+
 if __name__ == "__main__":
-    s = 5
-    m = Maze(s)
+    m = Maze(5)
     m.generate()
-    for i in range(s):
-        print(m.set_arr[i])
-    print()
-    for i in range(s):
-        for j in range(s):
-            print(0,end="")
-            if m.v_arr[i][j] == 1:
-                print("|", end="")
-            else:
-                print(" ", end="")
-        print()
-        for j in range(s):
-            if m.h_arr[i][j] == 1:
-                print("— ", end = "")
-            else:
-                print("  ", end="")
-        print()
