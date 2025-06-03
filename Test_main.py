@@ -1,2 +1,1 @@
-from main import *
-from random import randint
+print(0%2)

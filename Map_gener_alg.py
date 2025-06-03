@@ -50,6 +50,7 @@ class Maze:
 
     def _calc_size_set(self, set_name):
         count = 0
+        #считаем сколько элементов в линии принадлежит данному множеству
         for i in range(self.size[1]):
             if self.line[i] == set_name:
                 count +=1
@@ -84,9 +85,10 @@ class Maze:
 
     def end_gen(self):
         self.h_arr[self.size[0]-1] = [1]*self.size[1]
-        self.add_ver_wall()
-        self.v_arr[self.size[0]-1].append(1)
+        print(len(self.v_arr))
+        self.v_arr[self.size[0]-1] = [0]*self.size[1]
 
+    #обходим лабиринт, размещая объекты
     def _bypass(self, count, name):
         for i in range(self.size[0]):
             for j in range(self.size[1]):

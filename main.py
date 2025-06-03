@@ -1,4 +1,3 @@
-import tkinter
 
 from Map_gener_alg import *
 from tkinter import *
@@ -9,30 +8,72 @@ class Map:
     def __init__(self, size=(0,0), arr_object=[]):
         self.size = size
         self.arr_object = arr_object
+        self.map = Maze(self.size)
 
     def init_maze(self):
         self.map = Maze(self.size)
         self.map.generate()
+        print("complete gen")
+        print(self.map.v_arr)
+        print(self.map.h_arr)
 
     def add_obj(self):
         self.map.add_object(self.arr_object)
+        print("complete add")
 
     def _set_size(self):
-        self.size = (self.lenght.get(), self.width.get())
+        self.size = (int(self.lenght.get()), int(self.width.get()))
 
     def _creat_obj_arr(self):
-        string = self.obj_field.get("1.0",tkinter.END)
+        string = self.obj_field.get("1.0", END)
         inp = string.split()
         self.arr_object=[]
         if len(inp)%2 != 0:
             showerror(title="Obj_array_size_error",
                       message="Count of parameters is incorrect")
         for i in range(0, len(inp)-1, 2):
-            if type(inp[i]) != str or type(inp[i+1]) != int:
+            try:
+                int(inp[i+1])
+            except ValueError:
                 showerror(title="Obj_param_type_error",
-                          message=("Parameters type is incorrect. Error in line: " + str(i+1)))
+                          message=("Count of object is incorrect. Error in line: " + str(i + 1)))
+            if type(inp[i]) != str:
+                showerror(title="Obj_param_type_error",
+                          message=("Name is incorrect. Error in line: " + str(i + 1)))
                 break
-            self.arr_object.append(Object(inp[i], inp[i+1]))
+            self.arr_object.append(Object(inp[i], int(inp[i+1])))
+
+    def _unite_wall_floor(self):
+        arr = []
+        for i in range(self.size[0]*2):
+            arr.append([0]*self.size[1]*2)
+
+        for i in range(self.size[0]*2):
+            for j in range(1, self.size[1]*2, 2):
+                if i%2 != 0 and self.map.h_arr[i//2][j//2]:
+                    arr[i][j] = "1"
+                    arr[i][j-1]="1"
+                if i%2 == 0 and self.map.v_arr[i//2][j//2]:
+                    arr[i][j] = "1"
+                    arr[i+1][j] = "1"
+            arr[i][self.size[1]*2-1] = "1"
+        return arr
+
+    #ИСПРАВИТЬ ПРОБЛЕМУ,ДОБАВИТЬ АДАПТИВНОСТЬ РАЗМЕРА ВЫВОДА ЛАБИРИНТА
+    def _build_map(self):
+        self.canv.delete("all")
+        x = 0
+        y = 0
+        m_arr = self._unite_wall_floor()
+        print(m_arr)
+        for k in m_arr:
+            for q in k:
+                if q == '1':
+                    self.canv.create_rectangle(x, y, x + 10, y + 10, fill='black', outline='black')
+                x += 10
+            x = 0
+            y += 10
+        print("buildet")
 
     def start_app(self):
         root = Tk()
@@ -40,7 +81,9 @@ class Map:
         root.geometry("900x700")
 
         name =Label(text="Help info\nx mean space\n")
-        name.pack(anchor=NW)
+        self.canv = Canvas(bg="white", width=650, height=650)
+        self.canv.pack(anchor=E, side=LEFT)
+        name.pack(anchor=NW, side=TOP)
 
         #создаём первое поле для ввода настроек размера
         name = Label(text="Size of maze: lenght x width")
@@ -50,7 +93,7 @@ class Map:
         self.width = Entry(frame1, width=10)
         self.lenght.pack(side=LEFT)
         self.width.pack(side=LEFT)
-        accept_btn = Button(frame1, text="generate_map", command=self._set_size)
+        accept_btn = Button(frame1, text="accept", command=self._set_size)
         accept_btn.pack(fill=X)
         frame1.pack(anchor=NW)
 
@@ -66,16 +109,15 @@ class Map:
 
         # создаём третье поле с основными кнопками работы с лабиринтом
         frame3 = Frame(borderwidth=1, relief=SOLID)
-        gener_btn = Button(frame3, text="generate map", command= lambda: [self.init_maze, self.add_obj])
+        gener_btn = Button(frame3, text="generate map", command= lambda: [self.init_maze(), self.add_obj()])
         gener_btn.pack(fill=X)
-        view_btn = Button(frame3, text="view map")
+        view_btn = Button(frame3, text="view map", command= self._build_map)
         view_btn.pack(fill=X)
         save_btn = Button(frame3, text="save map")
         save_btn.pack(fill=X)
         frame3.pack(anchor=W)
 
         root.mainloop()
-
 
 class Object:
     def __init__(self, name, count):
