@@ -1,4 +1,4 @@
-from random import choice
+import random
 
 class Maze:
     def __init__(self, size):
@@ -39,7 +39,7 @@ class Maze:
     def add_ver_wall(self):
         vert_wall = [0]*self.size[1]
         for i in range(self.size[1]):
-            choose = choice([True, False])  #выбираем ставить стенку или нет
+            choose = random.choice([True, False])  #выбираем ставить стенку или нет
             #если ячейка - правая граница или текущая ячейка и ячейка справа принадлежат одному множеству (для предотвращения зацикливаний)
             if choose == True or i == self.size[1]-1 or self.line[i] == self.line[i+1]:
                 vert_wall[i] = 1
@@ -59,7 +59,7 @@ class Maze:
     def add_hor_wall(self):
         hor_wall = [0] * self.size[1]
         for i in range(self.size[1]):
-            choose = choice([True, False])
+            choose = random.choice([True, False])
             # Ставим стенку если у данного множества более 1 элемента
             if choose == True and self._calc_size_set(self.line[i]) == True:
                 hor_wall[i] = 1
@@ -90,11 +90,17 @@ class Maze:
 
     #обходим лабиринт, размещая объекты
     def _bypass(self, count, name):
+        probab_y = 0.9
         for i in range(self.size[0]):
             for j in range(self.size[1]):
-                if count > 0 and self.floor[i][j] == 0 and choice([True, False]):
+                if count > 0 and self.floor[i][j] == 0 and random.random() > probab_y:
                     self.floor[i][j] = name
                     count -= 1
+            if count == 0:
+                break
+            if probab_y > 0:
+                probab_y -= 0.3*i/count
+                print(probab_y)
 
     def add_object (self, arr_obj):
         for i in arr_obj:

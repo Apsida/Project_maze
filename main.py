@@ -22,12 +22,19 @@ class Map:
         print("complete add")
 
     def _set_size(self):
-        self.size = (int(self.lenght.get()), int(self.width.get()))
+        try:
+            l = int(self.lenght.get())
+            w = int(self.width.get())
+            self.size = (l, w)
+        except ValueError:
+            showerror(title="Size_type_error",
+                      message="Size of maze is incorrect")
 
     def _creat_obj_arr(self):
         string = self.obj_field.get("1.0", END)
         inp = string.split()
         self.arr_object=[]
+        summ_of_count = 0
         if len(inp)%2 != 0:
             showerror(title="Obj_array_size_error",
                       message="Count of parameters is incorrect")
@@ -41,21 +48,32 @@ class Map:
                 showerror(title="Obj_param_type_error",
                           message=("Name is incorrect. Error in line: " + str(i + 1)))
                 break
+            summ_of_count += int(inp[i+1])
             self.arr_object.append(Object(inp[i], int(inp[i+1])))
 
-    def _unite_wall_floor(self):
+        if summ_of_count > (self.size[0]*self.size[1]):
+            self.arr_object = []
+            showerror(title="Obj_param_count_error",
+                      message=("The number of objects exceeds the size of the field"))
+
+
+    def unite_wall_floor(self):
         arr = []
         for i in range(self.size[0]*2):
             arr.append([0]*self.size[1]*2)
 
         for i in range(self.size[0]*2):
             for j in range(1, self.size[1]*2, 2):
+                #добавляем горизонтальные и вертикальные стенки
                 if i%2 != 0 and self.map.h_arr[i//2][j//2]:
                     arr[i][j] = "1"
                     arr[i][j-1]="1"
-                if i%2 == 0 and self.map.v_arr[i//2][j//2]:
+                elif i%2 == 0 and self.map.v_arr[i//2][j//2]:
                     arr[i][j] = "1"
                     arr[i+1][j] = "1"
+                #добавляем элементы пола
+                if i%2 == 0 and self.map.floor[i//2][j//2] != 0:
+                    arr[i][j] = self.map.floor[i//2][j//2]
             arr[i][self.size[1]*2-1] = "1"
         return arr
 
@@ -64,12 +82,14 @@ class Map:
         self.canv.delete("all")
         x = 0
         y = 0
-        m_arr = self._unite_wall_floor()
+        m_arr = self.unite_wall_floor()
         print(m_arr)
         for k in m_arr:
             for q in k:
                 if q == '1':
                     self.canv.create_rectangle(x, y, x + 10, y + 10, fill='black', outline='black')
+                elif q != 0 and q != "1":
+                    self.canv.create_text(x+5, y+3, text=q)
                 x += 10
             x = 0
             y += 10
