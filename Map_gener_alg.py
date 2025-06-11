@@ -10,9 +10,6 @@ class Maze:
         self.set_arr = []
         self.set_num = 0 #счётчик генерации уникальных множеств
 
-    def _fill_floor(self):
-        for i in range(self.size[0]):
-            self.floor.append([0]*self.size[1])
 
     def generate(self):
         self.creat_line()
@@ -24,6 +21,10 @@ class Maze:
             self.check_hor_wall(j)
             self.prepare_new_line(j)
         self.end_gen()
+
+    def _fill_floor(self):
+        for i in range(self.size[0]):
+            self.floor.append([0]*self.size[1])
 
     def creat_line(self):   #создаём пустую линию в которой ни одна ячеёка не принадлежит ни одному множеству
         self.line = []
@@ -67,6 +68,7 @@ class Maze:
 
     def _calc_hor_wall(self, row, set_name):
         count = 0
+        #считаем сколько элементов в линии принадлежит данному множеству и при этом не стоит горизонтальная стенка
         for i in range(self.size[1]):
             if self.line[i] == set_name and self.h_arr[row][i] == 0:
                 count += 1
@@ -85,12 +87,11 @@ class Maze:
 
     def end_gen(self):
         self.h_arr[self.size[0]-1] = [1]*self.size[1]
-        print(len(self.v_arr))
         self.v_arr[self.size[0]-1] = [0]*self.size[1]
 
     #обходим лабиринт, размещая объекты
     def _bypass(self, count, name):
-        probab_y = 0.9
+        probab_y = 0.9  #коэффициент для более равномерного распределения предметов по карте
         for i in range(self.size[0]):
             for j in range(self.size[1]):
                 if count > 0 and self.floor[i][j] == 0 and random.random() > probab_y:
@@ -100,11 +101,13 @@ class Maze:
                 break
             if probab_y > 0:
                 probab_y -= 0.3*i/count
-                print(probab_y)
 
     def add_object (self, arr_obj):
+        id_count = 2    #счётчик для присовения id
         for i in arr_obj:
-            self._bypass(i.count, i.name[0])
+            i.id = id_count
+            self._bypass(i.count, i.id)
+            id_count += 1
 
 if __name__ == "__main__":
     m = Maze((3,5))

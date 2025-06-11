@@ -1,5 +1,6 @@
 
 from Map_gener_alg import *
+import pickle
 from tkinter import *
 from tkinter.scrolledtext import ScrolledText
 from tkinter.messagebox import showerror
@@ -13,13 +14,29 @@ class Map:
     def init_maze(self):
         self.map = Maze(self.size)
         self.map.generate()
-        print("complete gen")
-        print(self.map.v_arr)
-        print(self.map.h_arr)
 
     def add_obj(self):
         self.map.add_object(self.arr_object)
-        print("complete add")
+
+    def unite_wall_floor(self):
+        arr = []
+        for i in range(self.size[0]*2):
+            arr.append([0]*self.size[1]*2)
+
+        for i in range(self.size[0]*2):
+            for j in range(1, self.size[1]*2, 2):
+                #добавляем горизонтальные и вертикальные стенки
+                if i%2 != 0 and self.map.h_arr[i//2][j//2]:
+                    arr[i][j] = "1"
+                    arr[i][j-1]="1"
+                elif i%2 == 0 and self.map.v_arr[i//2][j//2]:
+                    arr[i][j] = "1"
+                    arr[i+1][j] = "1"
+                #добавляем элементы пола
+                if i%2 == 0 and self.map.floor[i//2][j//2] != 0:
+                    arr[i][j] = self.map.floor[i//2][j//2]
+            arr[i][self.size[1]*2-1] = "1"
+        return arr
 
     def _set_size(self):
         try:
@@ -56,28 +73,6 @@ class Map:
             showerror(title="Obj_param_count_error",
                       message=("The number of objects exceeds the size of the field"))
 
-
-    def unite_wall_floor(self):
-        arr = []
-        for i in range(self.size[0]*2):
-            arr.append([0]*self.size[1]*2)
-
-        for i in range(self.size[0]*2):
-            for j in range(1, self.size[1]*2, 2):
-                #добавляем горизонтальные и вертикальные стенки
-                if i%2 != 0 and self.map.h_arr[i//2][j//2]:
-                    arr[i][j] = "1"
-                    arr[i][j-1]="1"
-                elif i%2 == 0 and self.map.v_arr[i//2][j//2]:
-                    arr[i][j] = "1"
-                    arr[i+1][j] = "1"
-                #добавляем элементы пола
-                if i%2 == 0 and self.map.floor[i//2][j//2] != 0:
-                    arr[i][j] = self.map.floor[i//2][j//2]
-            arr[i][self.size[1]*2-1] = "1"
-        return arr
-
-    #ИСПРАВИТЬ ПРОБЛЕМУ,ДОБАВИТЬ АДАПТИВНОСТЬ РАЗМЕРА ВЫВОДА ЛАБИРИНТА
     def _build_map(self):
         self.canv.delete("all")
         x = 0
@@ -133,8 +128,8 @@ class Map:
         gener_btn.pack(fill=X)
         view_btn = Button(frame3, text="view map", command= self._build_map)
         view_btn.pack(fill=X)
-        save_btn = Button(frame3, text="save map")
-        save_btn.pack(fill=X)
+        # save_btn = Button(frame3, text="save map")
+        # save_btn.pack(fill=X)
         frame3.pack(anchor=W)
 
         root.mainloop()
@@ -143,7 +138,16 @@ class Object:
     def __init__(self, name, count):
         self.name = name
         self.count = count
+        self.id = 0
 
+def save_data(obj, n_file):
+    with open(n_file+".pickle", "wb") as file:
+        pickle.dump(obj, file)
+
+def load_data(n_file):
+    with open(n_file+".pickle", "rb") as file:
+        obj = pickle.load(file)
+    return obj
 
 if __name__ == "__main__":
     m = Map()
