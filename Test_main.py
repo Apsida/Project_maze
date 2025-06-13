@@ -1,9 +1,10 @@
 from main import *
 
+
 def TEST_SAVE_LOAD_EQ():
     x = Object("goblin", 10)
     y = Object("chest", 5)
-    m = Map((5,5), [x,y])
+    m = Map((5, 5), [x, y])
     m.init_maze()
     m.add_obj()
     exs1 = m.size
@@ -17,6 +18,7 @@ def TEST_SAVE_LOAD_EQ():
             if exs2[i][j] != outpt.map.v_arr[i][j]:
                 return False
     return True
+
 
 def run_all_tests():
     red_color_add = '\033[91m'
@@ -38,6 +40,7 @@ def run_all_tests():
     print("--------------------")
     print("Passed tests count: ", passed_tests_count)
     print("Failed tests count: ", all_tests_count - passed_tests_count)
+
 
 if __name__ == "__main__":
     run_all_tests()

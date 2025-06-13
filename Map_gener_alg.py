@@ -1,5 +1,6 @@
 import random
 
+
 class Maze:
     def __init__(self, size):
         self.size = size
@@ -8,25 +9,24 @@ class Maze:
         self.v_arr = []
         self.line = []
         self.set_arr = []
-        self.set_num = 0 #счётчик генерации уникальных множеств
-
+        self.set_num = 0  # счётчик генерации уникальных множеств
 
     def generate(self):
         self.creat_line()
         self._fill_floor()
         for j in range(self.size[0]):
             self.assign_set()
-            self.add_ver_wall()
-            self.add_hor_wall()
-            self.check_hor_wall(j)
+            self.add_vertical_wall()
+            self.add_horizontal_wall()
+            self.check_horizontal_wall(j)
             self.prepare_new_line(j)
         self.end_gen()
 
     def _fill_floor(self):
         for i in range(self.size[0]):
-            self.floor.append([0]*self.size[1])
+            self.floor.append([0] * self.size[1])
 
-    def creat_line(self):   #создаём пустую линию в которой ни одна ячеёка не принадлежит ни одному множеству
+    def creat_line(self):  # создаём пустую линию в которой ни одна ячеёка не принадлежит ни одному множеству
         self.line = []
         for i in range(self.size[1]):
             self.line.append(None)
@@ -37,27 +37,27 @@ class Maze:
                 self.line[i] = self.set_num
                 self.set_num += 1
 
-    def add_ver_wall(self):
-        vert_wall = [0]*self.size[1]
+    def add_vertical_wall(self):
+        vert_wall = [0] * self.size[1]
         for i in range(self.size[1]):
-            choose = random.choice([True, False])  #выбираем ставить стенку или нет
-            #если ячейка - правая граница или текущая ячейка и ячейка справа принадлежат одному множеству (для предотвращения зацикливаний)
-            if choose == True or i == self.size[1]-1 or self.line[i] == self.line[i+1]:
+            choose = random.choice([True, False])  # выбираем ставить стенку или нет
+            # если ячейка - правая граница или текущая ячейка и ячейка справа принадлежат одному множеству (для предотвращения зацикливаний)
+            if choose == True or i == self.size[1] - 1 or self.line[i] == self.line[i + 1]:
                 vert_wall[i] = 1
             else:
                 # объединяем эелементы разным множеств в случае если не ставим стенку
-                self.line[i+1] = self.line[i]
+                self.line[i + 1] = self.line[i]
         self.v_arr.append(vert_wall)
 
     def _calc_size_set(self, set_name):
         count = 0
-        #считаем сколько элементов в линии принадлежит данному множеству
+        # считаем сколько элементов в линии принадлежит данному множеству
         for i in range(self.size[1]):
             if self.line[i] == set_name:
-                count +=1
+                count += 1
         return count > 1
 
-    def add_hor_wall(self):
+    def add_horizontal_wall(self):
         hor_wall = [0] * self.size[1]
         for i in range(self.size[1]):
             choose = random.choice([True, False])
@@ -66,49 +66,47 @@ class Maze:
                 hor_wall[i] = 1
         self.h_arr.append(hor_wall)
 
-    def _calc_hor_wall(self, row, set_name):
+    def _calc_horizontal_wall(self, row, set_name):
         count = 0
-        #считаем сколько элементов в линии принадлежит данному множеству и при этом не стоит горизонтальная стенка
+        # считаем сколько элементов в линии принадлежит данному множеству и при этом не стоит горизонтальная стенка
         for i in range(self.size[1]):
             if self.line[i] == set_name and self.h_arr[row][i] == 0:
                 count += 1
         return count
 
-    def check_hor_wall(self, row):
+    def check_horizontal_wall(self, row):
         for i in range(self.size[1]):
-            if self._calc_hor_wall(row, self.line[i]) == 0:
+            if self._calc_horizontal_wall(row, self.line[i]) == 0:
                 self.h_arr[row][i] = 0
 
     def prepare_new_line(self, row):
-        self.set_arr.append(self.line.copy())      #сохраняем строку множеств
+        self.set_arr.append(self.line.copy())  # сохраняем строку множеств
         for i in range(self.size[1]):
-            if self.h_arr[row][i] == 1:     #все ячейки под стенками удаляем из множеств
+            if self.h_arr[row][i] == 1:  # все ячейки под стенками удаляем из множеств
                 self.line[i] = None
 
     def end_gen(self):
-        self.h_arr[self.size[0]-1] = [1]*self.size[1]
-        self.v_arr[self.size[0]-1] = [0]*self.size[1]
+        self.h_arr[self.size[0] - 1] = [1] * self.size[1]
+        self.v_arr[self.size[0] - 1] = [0] * self.size[1]
 
-    #обходим лабиринт, размещая объекты
+    # обходим лабиринт, размещая объекты
     def _bypass(self, count, name):
-        probab_y = 0.9  #коэффициент для более равномерного распределения предметов по карте
-        for i in range(self.size[0]):
-            for j in range(self.size[1]):
-                if count > 0 and self.floor[i][j] == 0 and random.random() > probab_y:
-                    self.floor[i][j] = name
-                    count -= 1
-            if count == 0:
-                break
-            if probab_y > 0:
-                probab_y -= 0.3*i/count
+        while count > 0:
+            x = random.randint(0, self.size[0] - 1)
+            y = random.randint(0, self.size[1] - 1)
 
-    def add_object (self, arr_obj):
-        id_count = 2    #счётчик для присовения id
+            if self.floor[y][x] == 0:
+                self.floor[y][x] = name
+                count -= 1
+
+    def add_object(self, arr_obj):
+        id_count = 2  # счётчик для присовения id
         for i in arr_obj:
             i.id = id_count
             self._bypass(i.count, i.id)
             id_count += 1
 
+
 if __name__ == "__main__":
-    m = Maze((3,5))
+    m = Maze((3, 5))
     m.generate()
