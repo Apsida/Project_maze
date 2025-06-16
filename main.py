@@ -5,7 +5,6 @@ from tkinter.scrolledtext import ScrolledText
 from tkinter.messagebox import showerror
 
 
-
 class Map:
     def __init__(self, size=(0, 0), arr_object=[]):
         self.size = size
@@ -13,13 +12,30 @@ class Map:
         self.map = Maze(self.size)
 
     def init_maze(self):
+        try:
+            high = int(self.size[0])
+            width = int(self.size[1])
+            if high == 0 or width == 0:
+                raise
+        except:
+            print("type of size err. Size must be: (int, int)")
+            return 1
         self.map = Maze(self.size)
         self.map.generate()
 
     def add_obj(self):
+        summ_of_count = 0
+        for i in self.arr_object:
+            summ_of_count += i.count
+        if summ_of_count >= self.size[0]*self.size[1]:
+            print("ERROR: the number of objects exceeds the size of the map")
+            return 1
         self.map.add_object(self.arr_object)
 
     def unite_wall_floor(self):
+        if self.size[0] == 0 or self.size[1] == 0:
+            return 1
+
         arr = []
         for i in range(self.size[0] * 2):
             arr.append([0] * self.size[1] * 2)
@@ -79,7 +95,10 @@ class Map:
         x = 0
         y = 0
         m_arr = self.unite_wall_floor()
-        print(m_arr)
+        if m_arr == 1:
+            showerror(title="Generate error",
+                      message=("You try to generate with wrong input data"))
+            return 1
         for k in m_arr:
             for q in k:
                 if q == '1':
@@ -137,11 +156,14 @@ class Map:
 
 
 class Object:
-    def __init__(self, name, count):  # сделать либо вывод кодов для объектов, либо
+    def __init__(self, name, count):# сделать либо вывод кодов для объектов, либо
+        try:
+            c = int(count)
+        except:
+            print("type of count error: count must be integer")
         self.name = name
         self.count = count
         self.id = 0
-
 
 def save_data(obj, n_file):
     with open(n_file + ".pickle", "wb") as file:

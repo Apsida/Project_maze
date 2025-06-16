@@ -19,6 +19,20 @@ def TEST_SAVE_LOAD_EQ():
                 return False
     return True
 
+def TEST_SIZE_TYPE():
+    x = Object("goblin", 10)
+    y = Object("chest", 5)
+    m = Map(("five", "e4trh"), [x, y])
+    err = m.init_maze()
+    return TRUE if err == 1 else False
+
+def TEST_CREAT_MANY_OBJECT():
+    x = Object("goblin", 10)
+    y = Object("chest", 17)
+    m = Map((5, 5), [x, y])
+    m.init_maze()
+    err = m.add_obj()
+    return TRUE if err == 1 else False
 
 def run_all_tests():
     red_color_add = '\033[91m'
@@ -30,7 +44,7 @@ def run_all_tests():
     passed_tests_count = 0
     all_tests_count = 0
 
-    test_funcs = [TEST_SAVE_LOAD_EQ]
+    test_funcs = [TEST_SAVE_LOAD_EQ, TEST_SIZE_TYPE, TEST_CREAT_MANY_OBJECT]
     for test_func in test_funcs:
         test_success = test_func()
         print(test_func.__name__ + " : " + (success_str if test_success else fail_str))
