@@ -95,8 +95,8 @@ class Maze:
             x = random.randint(0, self.size[0] - 1)
             y = random.randint(0, self.size[1] - 1)
 
-            if self.floor[y][x] == 0:
-                self.floor[y][x] = name
+            if self.floor[x][y] == 0:
+                self.floor[x][y] = name
                 count -= 1
 
     def add_object(self, arr_obj):

@@ -27,7 +27,7 @@ class Map:
         summ_of_count = 0
         for i in self.arr_object:
             summ_of_count += i.count
-        if summ_of_count >= self.size[0]*self.size[1]:
+        if summ_of_count >= self.size[0] * self.size[1]:
             print("ERROR: the number of objects exceeds the size of the map")
             return 1
         self.map.add_object(self.arr_object)
@@ -90,6 +90,12 @@ class Map:
             showerror(title="Obj_param_count_error",
                       message=("The number of objects exceeds the size of the field"))
 
+    def _object_id_output(self):
+        arr_id = "id of Your object:\n"
+        for i in self.arr_object:
+            arr_id = arr_id + i.name + "- " + str(i.id) + "\n"
+        self.obj_id.config(text=arr_id)
+
     def _build_map(self):
         self.canvas.delete("all")
         x = 0
@@ -109,54 +115,57 @@ class Map:
             x = 0
             y += 10
         print("buildet")
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        self._object_id_output()
 
     def start_app(self):
         root = Tk()
         root.title("Maze app")
         root.geometry("900x700")
 
-        name = Label(text="Help info\nx mean space\n")
-        self.canvas = Canvas(bg="white", width=650, height=650)
-        self.canvas.pack(anchor=E, side=LEFT)
-        name.pack(anchor=NW, side=TOP)
-
-        # создаём первое поле для ввода настроек размера
-        name = Label(text="Size of maze: lenght x width")
-        name.pack(anchor=NW)
         frame1 = Frame(borderwidth=1, relief=SOLID)
+
+        # поле для вывода визуализации сгенерированного лабиринта
+        self.canvas = Canvas(frame1, bg="white", width=700, height=700, scrollregion=(0, 0, 1000, 1000))
+        hbar = Scrollbar(frame1, orient=HORIZONTAL)
+        hbar.pack(side=BOTTOM, fill=X)
+        hbar.config(command=self.canvas.xview)
+        vbar = Scrollbar(frame1, orient=VERTICAL)
+        vbar.pack(side=RIGHT, fill=Y)
+        vbar.config(command=self.canvas.yview)
+        self.canvas.config(xscrollcommand=hbar.set, yscrollcommand=vbar.set)
+        self.canvas.pack(side=RIGHT, expand=True, fill=BOTH)
+
+        # меню для ввода параметров размера лабиринта
+        name = Label(frame1, text="Size of maze: lenght x width")
+        name.pack(anchor=NW)
         self.lenght = Entry(frame1, width=10)
         self.width = Entry(frame1, width=10)
-        self.lenght.pack(side=LEFT)
-        self.width.pack(side=LEFT)
+        self.lenght.pack()
+        self.width.pack()
         accept_btn = Button(frame1, text="apply", command=self._set_size)
         accept_btn.pack(fill=X)
-        frame1.pack(anchor=NW)
 
-        # создаём второе поле для ввода объектов
-        # создаём второе поле для ввода объектов
-        frame2 = Frame(borderwidth=1, relief=SOLID)
-        name = Label(frame2, text="Object to add (1 obj - 1 line)\nName x Count")
+        # меню для ввода параметров объектов
+        name = Label(frame1, text="Object to add (1 obj - 1 line)\nName x Count")
         name.pack(anchor=NW)
-        self.obj_field = ScrolledText(frame2, wrap="none", width=20, height=10)
+        self.obj_field = ScrolledText(frame1, wrap="none", width=20, height=10)
         self.obj_field.pack()
-        accept_btn = Button(frame2, text="apply", command=self._create_obj_arr)
+        accept_btn = Button(frame1, text="apply", command=self._create_obj_arr)
         accept_btn.pack(fill=X)
-        frame2.pack(anchor=W)
-
-        # создаём третье поле с основными кнопками работы с лабиринтом
-        frame3 = Frame(borderwidth=1, relief=SOLID)
-        gener_btn = Button(frame3, text="generate map",
+        gener_btn = Button(frame1, text="generate map",
                            command=lambda: [self.init_maze(), self.add_obj(), self._build_map()])
         gener_btn.pack(fill=X)
-        # save_btn = Button(frame3, text="save map")
-        # save_btn.pack(fill=X)
-        frame3.pack(anchor=W)
+
+        self.obj_id = Label(frame1)
+        self.obj_id.pack(anchor=NW, side=LEFT)
+        frame1.pack(anchor=NW, expand=True)
 
         root.mainloop()
 
 
 class Object:
-    def __init__(self, name, count):# сделать либо вывод кодов для объектов, либо
+    def __init__(self, name, count):
         try:
             c = int(count)
         except:
@@ -165,9 +174,11 @@ class Object:
         self.count = count
         self.id = 0
 
+
 def save_data(obj, n_file):
     with open(n_file + ".pickle", "wb") as file:
         pickle.dump(obj, file)
+
 
 def load_data(n_file):
     with open(n_file + ".pickle", "rb") as file:
