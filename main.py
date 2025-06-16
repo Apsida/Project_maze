@@ -126,7 +126,7 @@ class Map:
         frame1 = Frame(borderwidth=1, relief=SOLID)
 
         # поле для вывода визуализации сгенерированного лабиринта
-        self.canvas = Canvas(frame1, bg="white", width=700, height=700, scrollregion=(0, 0, 1000, 1000))
+        self.canvas = Canvas(frame1, bg="white", width=700, height=700, scrollregion=(0, 0, 700, 600))
         hbar = Scrollbar(frame1, orient=HORIZONTAL)
         hbar.pack(side=BOTTOM, fill=X)
         hbar.config(command=self.canvas.xview)
